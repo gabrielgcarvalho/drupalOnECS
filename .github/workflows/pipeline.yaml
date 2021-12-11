@@ -39,7 +39,7 @@ jobs:
         #   ECR_REPOSITORY: my-ecr-repo
         #   IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t drupal .
+          docker build -t drupal docker/
           docker tag drupal:latest 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
           docker push 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
       # - name: Deploy stack
