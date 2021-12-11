@@ -1,0 +1,17 @@
+version: "3"
+services: 
+  drupal:
+    build: .
+    container_name: drupal_ecs
+    restart: always
+    ports:
+      - 9998:80
+    working_dir: /opt
+    volumes:
+      - .:/opt:z
+    environment:
+      HOST: "${DBH}"
+      DBASE: "${DB}"
+      USER: "${DBU}"
+      PASS: "${DBP}"
+    command: bash -c "composer update"
