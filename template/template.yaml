@@ -843,6 +843,15 @@ Resources:
             - "cp -prR /var/www/html/sites/* /mnt"
           Essential: false
           Image: !Ref Image
+          environment:
+            - name: HOST
+              value: !GetAtt DrupalDB.Endpoint.Address
+            - name: DBASE
+              value: drupal2
+            - name: USER
+              value: !Ref DBAdminUsername
+            - name: PASS
+              value: !Ref DBPassword
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -861,8 +870,6 @@ Resources:
               ContainerName: "initcontainer"
           Essential: true
           Image: !Ref Image
-          # Command: 
-          #   - "/bin/sh -c \"drush en -y admin_toolbar admin_toolbar_tools\""
           MountPoints:
             -
               ContainerPath: "/var/www/html/modules/"
