@@ -840,7 +840,7 @@ Resources:
           EntryPoint:
             - "sh"
             - "-c"
-            - "cp -prR /var/www/html/sites/* /mnt"
+            - "cp -prR /opt/drupal/web/sites/* /mnt"
           Essential: false
           Image: !Ref Image
           environment:
@@ -852,6 +852,10 @@ Resources:
               value: !Ref DBAdminUsername
             - name: PASS
               value: !Ref DBPassword
+          Command:
+            - "/bin/sh" 
+            - "-c"
+            - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -872,19 +876,19 @@ Resources:
           Image: !Ref Image
           MountPoints:
             -
-              ContainerPath: "/var/www/html/modules/"
+              ContainerPath: "/opt/drupal/web/modules/"
               SourceVolume: "modules"
             
             - 
-              ContainerPath: "/var/www/html/sites/"
+              ContainerPath: "/opt/drupal/web/sites/"
               SourceVolume: "sites"
 
             - 
-              ContainerPath: "/var/www/html/profiles/"
+              ContainerPath: "/opt/drupal/web/profiles/"
               SourceVolume: "profiles"
 
             - 
-              ContainerPath: "/var/www/html/themes/"
+              ContainerPath: "/opt/drupal/web/themes/"
               SourceVolume: "themes"
           Name: "drupal2"
           PortMappings:
