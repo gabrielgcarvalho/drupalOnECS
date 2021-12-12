@@ -590,32 +590,32 @@ Resources:
         # Keep things at or lower than 50% CPU utilization, for example
         TargetValue: 75
 
-  service:
-    Type: AWS::ECS::Service
-    DependsOn: 
-    - listener
-    Properties:
-      ServiceName: !Join ['-',[!Ref ClusterName, service]]
-      Cluster: !Ref cluster
-      # TaskDefinition: !Ref taskdefinition
-      EnableExecuteCommand: true
-      DeploymentConfiguration:
-          MinimumHealthyPercent: 100
-          MaximumPercent: 200
-      DesiredCount: !Ref MinCapacity
-      LaunchType: FARGATE
-      NetworkConfiguration: 
-        AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
-          Subnets:
-            - !Ref PrivateSubnet1
-            - !Ref PrivateSubnet2
-          SecurityGroups:
-            - !Ref containersecuritygroup
-      LoadBalancers:
-        - ContainerName: "drupal2"
-          ContainerPort: 80
-          TargetGroupArn: !Ref targetgroup
+  # service:
+  #   Type: AWS::ECS::Service
+  #   DependsOn: 
+  #   - listener
+  #   Properties:
+  #     ServiceName: !Join ['-',[!Ref ClusterName, service]]
+  #     Cluster: !Ref cluster
+  #     # TaskDefinition: !Ref taskdefinition
+  #     EnableExecuteCommand: true
+  #     DeploymentConfiguration:
+  #         MinimumHealthyPercent: 100
+  #         MaximumPercent: 200
+  #     DesiredCount: !Ref MinCapacity
+  #     LaunchType: FARGATE
+  #     NetworkConfiguration: 
+  #       AwsvpcConfiguration:
+  #         AssignPublicIp: DISABLED
+  #         Subnets:
+  #           - !Ref PrivateSubnet1
+  #           - !Ref PrivateSubnet2
+  #         SecurityGroups:
+  #           - !Ref containersecuritygroup
+  #     LoadBalancers:
+  #       - ContainerName: "drupal2"
+  #         ContainerPort: 80
+  #         TargetGroupArn: !Ref targetgroup
     
   targetgroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -754,9 +754,6 @@ Resources:
       IpProtocol: tcp
       ToPort: 3306
       GroupId: !Ref containersecuritygroup
-
-
-
 
   albsecuritygroup:
     Type: AWS::EC2::SecurityGroup
