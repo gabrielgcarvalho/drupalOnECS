@@ -590,63 +590,63 @@ Resources:
   #       # Keep things at or lower than 50% CPU utilization, for example
   #       TargetValue: 75
 
-  service:
-    Type: AWS::ECS::Service
-    DependsOn: 
-    - listener
-    Properties:
-      ServiceName: !Join ['-',[!Ref ClusterName, service]]
-      Cluster: !Ref cluster
-      TaskDefinition: !Ref taskdefinition
-      EnableExecuteCommand: true
-      DeploymentConfiguration:
-          MinimumHealthyPercent: 100
-          MaximumPercent: 200
-      DesiredCount: !Ref MinCapacity
-      LaunchType: FARGATE
-      NetworkConfiguration: 
-        AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
-          Subnets:
-            - !Ref PrivateSubnet1
-            - !Ref PrivateSubnet2
-          SecurityGroups:
-            - !Ref containersecuritygroup
-      LoadBalancers:
-        - ContainerName: "drupal2"
-          ContainerPort: 80
-          TargetGroupArn: !Ref targetgroup
+  # service:
+  #   Type: AWS::ECS::Service
+  #   DependsOn: 
+  #   - listener
+  #   Properties:
+  #     ServiceName: !Join ['-',[!Ref ClusterName, service]]
+  #     Cluster: !Ref cluster
+  #     TaskDefinition: !Ref taskdefinition
+  #     EnableExecuteCommand: true
+  #     DeploymentConfiguration:
+  #         MinimumHealthyPercent: 100
+  #         MaximumPercent: 200
+  #     DesiredCount: !Ref MinCapacity
+  #     LaunchType: FARGATE
+  #     NetworkConfiguration: 
+  #       AwsvpcConfiguration:
+  #         AssignPublicIp: DISABLED
+  #         Subnets:
+  #           - !Ref PrivateSubnet1
+  #           - !Ref PrivateSubnet2
+  #         SecurityGroups:
+  #           - !Ref containersecuritygroup
+  #     LoadBalancers:
+  #       - ContainerName: "drupal2"
+  #         ContainerPort: 80
+  #         TargetGroupArn: !Ref targetgroup
     
-  targetgroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    DependsOn: loadbalancer
-    Properties:
-      TargetGroupAttributes:
-      - Key: stickiness.enabled
-        Value: "true"
-      - Key: stickiness.type
-        Value: lb_cookie 
-      HealthCheckIntervalSeconds: 60
-      HealthCheckPath: /
-      HealthCheckTimeoutSeconds: 30
-      UnhealthyThresholdCount: 5
-      HealthyThresholdCount: 2
-      Matcher:
-        HttpCode: "200,302"
-      Name: !Join ['-', [!Ref ClusterName, TargetGroup]]
-      Port: 80
-      Protocol: HTTP
-      TargetType: ip
-      VpcId: !Ref VPC
-  listener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - TargetGroupArn: !Ref targetgroup
-          Type: forward
-      LoadBalancerArn: !Ref loadbalancer
-      Port: 80
-      Protocol: HTTP
+  # targetgroup:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   DependsOn: loadbalancer
+  #   Properties:
+  #     TargetGroupAttributes:
+  #     - Key: stickiness.enabled
+  #       Value: "true"
+  #     - Key: stickiness.type
+  #       Value: lb_cookie 
+  #     HealthCheckIntervalSeconds: 60
+  #     HealthCheckPath: /
+  #     HealthCheckTimeoutSeconds: 30
+  #     UnhealthyThresholdCount: 5
+  #     HealthyThresholdCount: 2
+  #     Matcher:
+  #       HttpCode: "200,302"
+  #     Name: !Join ['-', [!Ref ClusterName, TargetGroup]]
+  #     Port: 80
+  #     Protocol: HTTP
+  #     TargetType: ip
+  #     VpcId: !Ref VPC
+  # listener:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     DefaultActions:
+  #       - TargetGroupArn: !Ref targetgroup
+  #         Type: forward
+  #     LoadBalancerArn: !Ref loadbalancer
+  #     Port: 80
+  #     Protocol: HTTP
 
   loadbalancerLogBucket:
     Type: 'AWS::S3::Bucket'
@@ -658,10 +658,10 @@ Resources:
           - 'logs'
           - !Ref 'AWS::AccountId'
           - !Ref 'AWS::Region'
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: AES256
   
   loadbalancerLogBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
@@ -773,172 +773,172 @@ Resources:
           ToPort: 80
           Description: "ALB security group Egress"
 
-  loggroupKmskey:
-    Type: AWS::KMS::Key
-    Properties: 
-      Description: KMS key to encrypt the CloudWatch LogGroup
-      Enabled: true
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: '2012-10-17'
-        Id: key-default-1
-        Statement:
-        - Sid: Enable IAM User Permissions
-          Effect: Allow
-          Principal:
-            AWS: !Join ['',['arn:aws:iam::',!Ref AWS::AccountId,':root']]
-          Action: kms:*
-          Resource: '*'
-        - Sid: Enabled CloudWatch to access KMS
-          Effect: Allow
-          Principal:
-            Service: !Join ['',['logs.',!Ref AWS::Region,'.amazonaws.com']]
-          Action:
-            - kms:Encrypt*
-            - kms:Decrypt*
-            - kms:ReEncrypt*
-            - kms:GenerateDataKey*
-            - kms:Describe*
-          Resource: '*'
-        - Sid: Allow ELB logs to be sent to S3
-          Effect: Allow
-          Principal:
-            Service: delivery.logs.amazonaws.com
-          Action:
-            - kms:Encrypt*
-            - kms:Decrypt*
-            - kms:ReEncrypt*
-            - kms:GenerateDataKey*
-            - kms:Describe*
-          Resource: '*'
+  # loggroupKmskey:
+  #   Type: AWS::KMS::Key
+  #   Properties: 
+  #     Description: KMS key to encrypt the CloudWatch LogGroup
+  #     Enabled: true
+  #     EnableKeyRotation: true
+  #     KeyPolicy:
+  #       Version: '2012-10-17'
+  #       Id: key-default-1
+  #       Statement:
+  #       - Sid: Enable IAM User Permissions
+  #         Effect: Allow
+  #         Principal:
+  #           AWS: !Join ['',['arn:aws:iam::',!Ref AWS::AccountId,':root']]
+  #         Action: kms:*
+  #         Resource: '*'
+  #       - Sid: Enabled CloudWatch to access KMS
+  #         Effect: Allow
+  #         Principal:
+  #           Service: !Join ['',['logs.',!Ref AWS::Region,'.amazonaws.com']]
+  #         Action:
+  #           - kms:Encrypt*
+  #           - kms:Decrypt*
+  #           - kms:ReEncrypt*
+  #           - kms:GenerateDataKey*
+  #           - kms:Describe*
+  #         Resource: '*'
+  #       - Sid: Allow ELB logs to be sent to S3
+  #         Effect: Allow
+  #         Principal:
+  #           Service: delivery.logs.amazonaws.com
+  #         Action:
+  #           - kms:Encrypt*
+  #           - kms:Decrypt*
+  #           - kms:ReEncrypt*
+  #           - kms:GenerateDataKey*
+  #           - kms:Describe*
+  #         Resource: '*'
 
-      #KeySpec: String
-      #KeyUsage: String
-      PendingWindowInDays: 7
+  #     #KeySpec: String
+  #     #KeyUsage: String
+  #     PendingWindowInDays: 7
 
-  LogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, taskdefinition]]
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt loggroupKmskey.Arn
+  # LogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, taskdefinition]]
+  #     RetentionInDays: 30
+  #     KmsKeyId: !GetAtt loggroupKmskey.Arn
 
-  taskdefinition: 
-    Type: AWS::ECS::TaskDefinition
-    Properties: 
-      RequiresCompatibilities:
-        - "EC2"
-        - "FARGATE"
-      Family: !Join ["-",[!Ref ClusterName,td]]
-      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
-      TaskRoleArn: !GetAtt ECSTaskRole.Arn
-      ContainerDefinitions:
-        -
-          EntryPoint:
-            - "sh"
-            - "-c"
-            - "cp -prR /opt/drupal/web/sites/* /mnt"
-          Essential: false
-          Image: !Ref Image
-          # environment:
-          #   - name: HOST
-          #     value: !GetAtt DrupalDB.Endpoint.Address
-          #   - name: DBASE
-          #     value: drupal2
-          #   - name: USER
-          #     value: !Ref DBAdminUsername
-          #   - name: PASS
-          #     value: !Ref DBPassword
-          # Command:
-          #   - "/bin/sh" 
-          #   - "-c"
-          #   - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref LogGroup
-              awslogs-stream-prefix: ecs
-          MountPoints:
-            - 
-              ContainerPath: "/mnt"
-              SourceVolume: "sites"
-          Name: "initcontainer"
-        -
-          DependsOn:
-            -
-              Condition: "COMPLETE"
-              ContainerName: "initcontainer"
-          Essential: true
-          Image: !Ref Image
-          MountPoints:
-            -
-              ContainerPath: "/opt/drupal/web/modules/"
-              SourceVolume: "modules"
+  # taskdefinition: 
+  #   Type: AWS::ECS::TaskDefinition
+  #   Properties: 
+  #     RequiresCompatibilities:
+  #       - "EC2"
+  #       - "FARGATE"
+  #     Family: !Join ["-",[!Ref ClusterName,td]]
+  #     ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+  #     TaskRoleArn: !GetAtt ECSTaskRole.Arn
+  #     ContainerDefinitions:
+  #       -
+  #         EntryPoint:
+  #           - "sh"
+  #           - "-c"
+  #           - "cp -prR /opt/drupal/web/sites/* /mnt"
+  #         Essential: false
+  #         Image: !Ref Image
+  #         # environment:
+  #         #   - name: HOST
+  #         #     value: !GetAtt DrupalDB.Endpoint.Address
+  #         #   - name: DBASE
+  #         #     value: drupal2
+  #         #   - name: USER
+  #         #     value: !Ref DBAdminUsername
+  #         #   - name: PASS
+  #         #     value: !Ref DBPassword
+  #         # Command:
+  #         #   - "/bin/sh" 
+  #         #   - "-c"
+  #         #   - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
+  #         LogConfiguration:
+  #           LogDriver: awslogs
+  #           Options:
+  #             awslogs-region: !Ref AWS::Region
+  #             awslogs-group: !Ref LogGroup
+  #             awslogs-stream-prefix: ecs
+  #         MountPoints:
+  #           - 
+  #             ContainerPath: "/mnt"
+  #             SourceVolume: "sites"
+  #         Name: "initcontainer"
+  #       -
+  #         DependsOn:
+  #           -
+  #             Condition: "COMPLETE"
+  #             ContainerName: "initcontainer"
+  #         Essential: true
+  #         Image: !Ref Image
+  #         MountPoints:
+  #           -
+  #             ContainerPath: "/opt/drupal/web/modules/"
+  #             SourceVolume: "modules"
             
-            - 
-              ContainerPath: "/opt/drupal/web/sites/"
-              SourceVolume: "sites"
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/sites/"
+  #             SourceVolume: "sites"
 
-            - 
-              ContainerPath: "/opt/drupal/web/profiles/"
-              SourceVolume: "profiles"
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/profiles/"
+  #             SourceVolume: "profiles"
 
-            - 
-              ContainerPath: "/opt/drupal/web/themes/"
-              SourceVolume: "themes"
-          Name: "drupal2"
-          PortMappings:
-            -
-              ContainerPort: 80
-              HostPort: 80
-              Protocol: tcp
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/themes/"
+  #             SourceVolume: "themes"
+  #         Name: "drupal2"
+  #         PortMappings:
+  #           -
+  #             ContainerPort: 80
+  #             HostPort: 80
+  #             Protocol: tcp
 
-      Cpu: "512"
-      Memory: "1024"
-      NetworkMode: awsvpc
-      Volumes:
-        - 
-          Name: themes
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointThemes
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
+  #     Cpu: "512"
+  #     Memory: "1024"
+  #     NetworkMode: awsvpc
+  #     Volumes:
+  #       - 
+  #         Name: themes
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointThemes
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
           
         
-        -
-          Name: profiles
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointProfiles
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
+  #       -
+  #         Name: profiles
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointProfiles
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
           
 
-        -
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointSites
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
-          Name: sites
+  #       -
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointSites
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
+  #         Name: sites
 
-        -
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointModules
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
-          Name: modules
+  #       -
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointModules
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
+  #         Name: modules
 
 
 Outputs:
