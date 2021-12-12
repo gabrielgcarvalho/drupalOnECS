@@ -597,7 +597,7 @@ Resources:
     Properties:
       ServiceName: !Join ['-',[!Ref ClusterName, service]]
       Cluster: !Ref cluster
-      # TaskDefinition: !Ref taskdefinition
+      TaskDefinition: !Ref taskdefinition
       EnableExecuteCommand: true
       DeploymentConfiguration:
           MinimumHealthyPercent: 100
