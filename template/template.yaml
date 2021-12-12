@@ -826,122 +826,122 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt loggroupKmskey.Arn
 
-  taskdefinition: 
-    Type: AWS::ECS::TaskDefinition
-    Properties: 
-      RequiresCompatibilities:
-        - "EC2"
-        - "FARGATE"
-      Family: !Join ["-",[!Ref ClusterName,td]]
-      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
-      TaskRoleArn: !GetAtt ECSTaskRole.Arn
-      ContainerDefinitions:
-        -
-          EntryPoint:
-            - "sh"
-            - "-c"
-            - "cp -prR /opt/drupal/web/sites/* /mnt"
-          Essential: false
-          Image: !Ref Image
-          environment:
-            - name: HOST
-              value: !GetAtt DrupalDB.Endpoint.Address
-            - name: DBASE
-              value: drupal2
-            - name: USER
-              value: !Ref DBAdminUsername
-            - name: PASS
-              value: !Ref DBPassword
-          Command:
-            - "/bin/sh" 
-            - "-c"
-            - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref LogGroup
-              awslogs-stream-prefix: ecs
-          MountPoints:
-            - 
-              ContainerPath: "/mnt"
-              SourceVolume: "sites"
-          Name: "initcontainer"
-        -
-          DependsOn:
-            -
-              Condition: "COMPLETE"
-              ContainerName: "initcontainer"
-          Essential: true
-          Image: !Ref Image
-          MountPoints:
-            -
-              ContainerPath: "/opt/drupal/web/modules/"
-              SourceVolume: "modules"
+  # taskdefinition: 
+  #   Type: AWS::ECS::TaskDefinition
+  #   Properties: 
+  #     RequiresCompatibilities:
+  #       - "EC2"
+  #       - "FARGATE"
+  #     Family: !Join ["-",[!Ref ClusterName,td]]
+  #     ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+  #     TaskRoleArn: !GetAtt ECSTaskRole.Arn
+  #     ContainerDefinitions:
+  #       -
+  #         EntryPoint:
+  #           - "sh"
+  #           - "-c"
+  #           - "cp -prR /opt/drupal/web/sites/* /mnt"
+  #         Essential: false
+  #         Image: !Ref Image
+  #         environment:
+  #           - name: HOST
+  #             value: !GetAtt DrupalDB.Endpoint.Address
+  #           - name: DBASE
+  #             value: drupal2
+  #           - name: USER
+  #             value: !Ref DBAdminUsername
+  #           - name: PASS
+  #             value: !Ref DBPassword
+  #         Command:
+  #           - "/bin/sh" 
+  #           - "-c"
+  #           - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
+  #         LogConfiguration:
+  #           LogDriver: awslogs
+  #           Options:
+  #             awslogs-region: !Ref AWS::Region
+  #             awslogs-group: !Ref LogGroup
+  #             awslogs-stream-prefix: ecs
+  #         MountPoints:
+  #           - 
+  #             ContainerPath: "/mnt"
+  #             SourceVolume: "sites"
+  #         Name: "initcontainer"
+  #       -
+  #         DependsOn:
+  #           -
+  #             Condition: "COMPLETE"
+  #             ContainerName: "initcontainer"
+  #         Essential: true
+  #         Image: !Ref Image
+  #         MountPoints:
+  #           -
+  #             ContainerPath: "/opt/drupal/web/modules/"
+  #             SourceVolume: "modules"
             
-            - 
-              ContainerPath: "/opt/drupal/web/sites/"
-              SourceVolume: "sites"
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/sites/"
+  #             SourceVolume: "sites"
 
-            - 
-              ContainerPath: "/opt/drupal/web/profiles/"
-              SourceVolume: "profiles"
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/profiles/"
+  #             SourceVolume: "profiles"
 
-            - 
-              ContainerPath: "/opt/drupal/web/themes/"
-              SourceVolume: "themes"
-          Name: "drupal2"
-          PortMappings:
-            -
-              ContainerPort: 80
-              HostPort: 80
-              Protocol: tcp
+  #           - 
+  #             ContainerPath: "/opt/drupal/web/themes/"
+  #             SourceVolume: "themes"
+  #         Name: "drupal2"
+  #         PortMappings:
+  #           -
+  #             ContainerPort: 80
+  #             HostPort: 80
+  #             Protocol: tcp
 
-      Cpu: "512"
-      Memory: "1024"
-      NetworkMode: awsvpc
-      Volumes:
-        - 
-          Name: themes
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointThemes
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
+  #     Cpu: "512"
+  #     Memory: "1024"
+  #     NetworkMode: awsvpc
+  #     Volumes:
+  #       - 
+  #         Name: themes
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointThemes
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
           
         
-        -
-          Name: profiles
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointProfiles
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
+  #       -
+  #         Name: profiles
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointProfiles
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
           
 
-        -
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointSites
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
-          Name: sites
+  #       -
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointSites
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
+  #         Name: sites
 
-        -
-          EFSVolumeConfiguration:
-            FilesystemId: !Ref EFSFileSystem
-            AuthorizationConfig:
-              IAM: ENABLED
-              AccessPointId: !Ref AccessPointModules
-            TransitEncryption: ENABLED
-            RootDirectory: "/"
-          Name: modules
+  #       -
+  #         EFSVolumeConfiguration:
+  #           FilesystemId: !Ref EFSFileSystem
+  #           AuthorizationConfig:
+  #             IAM: ENABLED
+  #             AccessPointId: !Ref AccessPointModules
+  #           TransitEncryption: ENABLED
+  #           RootDirectory: "/"
+  #         Name: modules
 
 
 Outputs:
