@@ -944,6 +944,12 @@ Resources:
               ContainerName: "initcontainer"
           Essential: true
           Image: !Ref Image
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: ecs
           MountPoints:
             -
               ContainerPath: "/opt/drupal/web/modules/"
