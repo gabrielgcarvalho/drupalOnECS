@@ -816,12 +816,12 @@ Resources:
   #     #KeyUsage: String
   #     PendingWindowInDays: 7
 
-  # LogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, taskdefinition]]
-  #     RetentionInDays: 30
-  #     KmsKeyId: !GetAtt loggroupKmskey.Arn
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, taskdefinition]]
+      RetentionInDays: 30
+      # KmsKeyId: !GetAtt loggroupKmskey.Arn
 
   taskdefinition: 
     Type: AWS::ECS::TaskDefinition
@@ -874,12 +874,12 @@ Resources:
             - "sh" 
             - "-c"
             - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
-          # LogConfiguration:
-          #   LogDriver: awslogs
-          #   Options:
-          #     awslogs-region: !Ref AWS::Region
-          #     awslogs-group: !Ref LogGroup
-          #     awslogs-stream-prefix: ecs
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: ecs
           environment:
             - name: HOST
               value: !GetAtt DrupalDB.Endpoint.Address
