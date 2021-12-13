@@ -870,10 +870,10 @@ Resources:
               ContainerPath: "/var/www/html/themes/"
               SourceVolume: "themes"
           Name: "drupal2"         
-          Command:
-            - "sh" 
-            - "-c"
-            - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
+          # Command:
+          #   - "sh" 
+          #   - "-c"
+          #   - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
           LogConfiguration:
             LogDriver: awslogs
             Options:
