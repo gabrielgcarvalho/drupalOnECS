@@ -1,0 +1,227 @@
+{
+    "ipcMode": null,
+    "executionRoleArn": "arn:aws:iam::688832125989:role/drupalOnEcs-ExecutionRole-WV79I8ZOTUBX",
+    "containerDefinitions": [
+        {
+            "dnsSearchDomains": [],
+            "environmentFiles": null,
+            "entryPoint": [
+                "sh",
+                "-c",
+                "cp -prR /opt/drupal/web/sites/* /mnt"
+            ],
+            "portMappings": [],
+            "command": [],
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "DBASE",
+                    "value": "drupal2"
+                },
+                {
+                    "name": "HOST",
+                    "value": "drupal-db-aurora-serverless2.cluster-cha5crccj22i.us-east-2.rds.amazonaws.com"
+                },
+                {
+                    "name": "USER",
+                    "value": "admin"
+                },
+                {
+                    "name": "PASS",
+                    "value": "123abcde"
+                }
+            ],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": [],
+            "mountPoints": [
+                {
+                    "readOnly": null,
+                    "containerPath": "/mnt",
+                    "sourceVolume": "sites"
+                }
+            ],
+            "workingDirectory": null,
+            "secrets": null,
+            "dockerSecurityOptions": [],
+            "memory": null,
+            "memoryReservation": null,
+            "volumesFrom": [],
+            "stopTimeout": null,
+            "image": "688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": null,
+            "disableNetworking": null,
+            "interactive": true,
+            "healthCheck": null,
+            "essential": false,
+            "links": [],
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": {},
+            "systemControls": [],
+            "privileged": null,
+            "name": "initcontainer"
+        },
+        {
+            "dnsSearchDomains": [],
+            "environmentFiles": null,
+            "logConfiguration": null,
+            "entryPoint": [],
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "command": [],
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": [],
+            "mountPoints": [
+                {
+                    "readOnly": null,
+                    "containerPath": "/opt/drupal/web/modules/",
+                    "sourceVolume": "modules"
+                },
+                {
+                    "readOnly": null,
+                    "containerPath": "/opt/drupal/web/sites/",
+                    "sourceVolume": "sites"
+                },
+                {
+                    "readOnly": null,
+                    "containerPath": "/opt/drupal/web/profiles/",
+                    "sourceVolume": "profiles"
+                },
+                {
+                    "readOnly": null,
+                    "containerPath": "/opt/drupal/web/themes/",
+                    "sourceVolume": "themes"
+                }
+            ],
+            "workingDirectory": null,
+            "secrets": null,
+            "dockerSecurityOptions": [],
+            "memory": null,
+            "memoryReservation": null,
+            "volumesFrom": [],
+            "stopTimeout": null,
+            "image": "688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": [
+                {
+                    "containerName": "initcontainer",
+                    "condition": "COMPLETE"
+                }
+            ],
+            "disableNetworking": null,
+            "interactive": null,
+            "healthCheck": null,
+            "essential": true,
+            "links": [],
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": {},
+            "systemControls": [],
+            "privileged": null,
+            "name": "drupal2"
+        }
+    ],
+    "memory": "1024",
+    "taskRoleArn": "arn:aws:iam::688832125989:role/drupalOnEcs-ECSTaskRole-RKQPXXZY5OHZ",
+    "family": "drupalonefs2-td",
+    "pidMode": null,
+    "requiresCompatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "runtimePlatform": {
+        "operatingSystemFamily": "LINUX",
+        "cpuArchitecture": null
+    },
+    "cpu": "512",
+    "inferenceAccelerators": [],
+    "proxyConfiguration": null,
+    "volumes": [
+        {
+            "fsxWindowsFileServerVolumeConfiguration": null,
+            "efsVolumeConfiguration": {
+                "transitEncryptionPort": null,
+                "fileSystemId": "fs-0ee0afe73ad18806e",
+                "authorizationConfig": {
+                    "iam": "ENABLED",
+                    "accessPointId": "fsap-0d238db34cba2c725"
+                },
+                "transitEncryption": "ENABLED",
+                "rootDirectory": "/"
+            },
+            "name": "themes",
+            "host": null,
+            "dockerVolumeConfiguration": null
+        },
+        {
+            "fsxWindowsFileServerVolumeConfiguration": null,
+            "efsVolumeConfiguration": {
+                "transitEncryptionPort": null,
+                "fileSystemId": "fs-0ee0afe73ad18806e",
+                "authorizationConfig": {
+                    "iam": "ENABLED",
+                    "accessPointId": "fsap-0f5bc8a2d9bd0c4ec"
+                },
+                "transitEncryption": "ENABLED",
+                "rootDirectory": "/"
+            },
+            "name": "profiles",
+            "host": null,
+            "dockerVolumeConfiguration": null
+        },
+        {
+            "fsxWindowsFileServerVolumeConfiguration": null,
+            "efsVolumeConfiguration": {
+                "transitEncryptionPort": null,
+                "fileSystemId": "fs-0ee0afe73ad18806e",
+                "authorizationConfig": {
+                    "iam": "ENABLED",
+                    "accessPointId": "fsap-069fd8b3e827e31ca"
+                },
+                "transitEncryption": "ENABLED",
+                "rootDirectory": "/"
+            },
+            "name": "sites",
+            "host": null,
+            "dockerVolumeConfiguration": null
+        },
+        {
+            "fsxWindowsFileServerVolumeConfiguration": null,
+            "efsVolumeConfiguration": {
+                "transitEncryptionPort": null,
+                "fileSystemId": "fs-0ee0afe73ad18806e",
+                "authorizationConfig": {
+                    "iam": "ENABLED",
+                    "accessPointId": "fsap-04357a507abe49ebc"
+                },
+                "transitEncryption": "ENABLED",
+                "rootDirectory": "/"
+            },
+            "name": "modules",
+            "host": null,
+            "dockerVolumeConfiguration": null
+        }
+    ],
+    "tags": []
+}
