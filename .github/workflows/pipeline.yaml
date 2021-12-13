@@ -60,4 +60,4 @@ jobs:
           aws-region: us-east-2
       - name: Deploy stack
         run: |
-            aws cloudformation deploy --template-file template/template.yaml --stack-name drupalOnEcs --parameter-overrides DBPassword=123abcde --capabilities [CAPABILITY_IAM,CAPABILITY_NAMED_IAM] 
+            aws cloudformation deploy --template-file template/template.yaml --stack-name drupalOnEcs --parameter-overrides DBPassword=123abcde --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
