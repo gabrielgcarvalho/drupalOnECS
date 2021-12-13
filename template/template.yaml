@@ -840,25 +840,7 @@ Resources:
             - "cp -prR /var/www/html/sites/* /mnt"
           Essential: false
           Image: !Ref Image
-          environment:
-            - name: HOST
-              value: !GetAtt DrupalDB.Endpoint.Address
-            - name: DBASE
-              value: drupal2
-            - name: USER
-              value: !Ref DBAdminUsername
-            - name: PASS
-              value: !Ref DBPassword
-          # Command:
-          #   - "/bin/sh" 
-          #   - "-c"
-          #   - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
-          # LogConfiguration:
-          #   LogDriver: awslogs
-          #   Options:
-          #     awslogs-region: !Ref AWS::Region
-          #     awslogs-group: !Ref LogGroup
-          #     awslogs-stream-prefix: ecs
+
           MountPoints:
             - 
               ContainerPath: "/mnt"
@@ -887,7 +869,26 @@ Resources:
             - 
               ContainerPath: "/var/www/html/themes/"
               SourceVolume: "themes"
-          Name: "drupal2"
+          Name: "drupal2"         
+          Command:
+            - "sh" 
+            - "-c"
+            - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
+          # LogConfiguration:
+          #   LogDriver: awslogs
+          #   Options:
+          #     awslogs-region: !Ref AWS::Region
+          #     awslogs-group: !Ref LogGroup
+          #     awslogs-stream-prefix: ecs
+          environment:
+            - name: HOST
+              value: !GetAtt DrupalDB.Endpoint.Address
+            - name: DBASE
+              value: drupal2
+            - name: USER
+              value: !Ref DBAdminUsername
+            - name: PASS
+              value: !Ref DBPassword
           PortMappings:
             -
               ContainerPort: 80
