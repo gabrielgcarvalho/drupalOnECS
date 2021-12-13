@@ -9,8 +9,10 @@ Metadata:
           - VpcCIDR
           - PublicSubnet1CIDR
           - PublicSubnet2CIDR
+          - PublicSubnet3CIDR
           - PrivateSubnet1CIDR
           - PrivateSubnet2CIDR
+          - PrivateSubnet3CIDR
       - 
         Label: 
           default: "ECS cluster Configuration"
@@ -44,7 +46,7 @@ Parameters:
   ClusterName:
     Type: String 
     Description: Name for Aurora Cluster DB and EFS. 
-    Default: drupalonefs2
+    Default: drupalonefs
   Image:
     Type: String
     Default: "drupal:9-php7.4-apache"
@@ -73,6 +75,10 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
     Type: String
     Default: 10.192.11.0/24
+  PublicSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.12.0/24
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
@@ -81,6 +87,10 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.192.21.0/24
+  PrivateSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.22.0/24
   DBAdminUsername:
     Description: Please enter a username for the Aurora DB that will be created as part of this stack. 
     Type: String
@@ -98,7 +108,7 @@ Parameters:
   MaximumAuroraCapacityUnit:
     Description: Maximum Aurora capacity unit
     Type: Number
-    Default: 8   
+    Default: 16    
   PerformanceMode:
     Type: String
     AllowedValues: [ generalPurpose, maxIO ]
@@ -171,6 +181,10 @@ Mappings:
       "elbAcc" : "076674570225"
     sa-east-1:
       "elbAcc" : "507241528517"
+    us-gov-west-1:
+      "elbAcc" : "048591011584"
+    us-gov-east-1:
+      "elbAcc" : "190560391635"
   
 Resources:
   #VPC resources
@@ -225,6 +239,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+  
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
+      CidrBlock: !Ref PublicSubnet3CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ3)
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -248,6 +273,18 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
 
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
+      CidrBlock: !Ref PrivateSubnet3CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Subnet (AZ3)
+
+
   NatGateway1EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
@@ -255,6 +292,12 @@ Resources:
       Domain: vpc
 
   NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  
+  NatGateway3EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
@@ -271,6 +314,12 @@ Resources:
     Properties:
       AllocationId: !GetAtt NatGateway2EIP.AllocationId
       SubnetId: !Ref PublicSubnet2
+
+  NatGateway3:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway3EIP.AllocationId
+      SubnetId: !Ref PublicSubnet3
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -299,6 +348,13 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
+
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
+
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -341,6 +397,27 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
+  
+  PrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Routes (AZ3)
+
+  DefaultPrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
 
   #DB Resources
   DrupalDBSubnetGroupName:
@@ -350,6 +427,7 @@ Resources:
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
 
   DrupalDBSG:
     Type: AWS::EC2::SecurityGroup
@@ -373,8 +451,8 @@ Resources:
   DrupalDB:
     Type: AWS::RDS::DBCluster
     Properties:
-      DatabaseName: drupal2
-      DBClusterIdentifier: drupal-db-aurora-serverless2
+      DatabaseName: drupal
+      DBClusterIdentifier: drupal-db-aurora-serverless
       DBSubnetGroupName: !Ref DrupalDBSubnetGroupName
       Engine: aurora-mysql
       EngineMode: serverless
@@ -440,6 +518,12 @@ Resources:
       FileSystemId: !Ref EFSFileSystem
       SecurityGroups: [ !Ref EFSSecurityGroup ]
       SubnetId: !Ref PrivateSubnet2
+  MountTargetPrivateSubnet3:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      SecurityGroups: [ !Ref EFSSecurityGroup ]
+      SubnetId: !Ref PrivateSubnet3
   AccessPointSites:
       Type: 'AWS::EFS::AccessPoint'
       Properties:
@@ -556,7 +640,7 @@ Resources:
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ['', [!Ref ClusterName, AutoScalingRole]]
+      #RoleName: !Join ['', [!Ref ClusterName, AutoScalingRole]]
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -610,10 +694,11 @@ Resources:
           Subnets:
             - !Ref PrivateSubnet1
             - !Ref PrivateSubnet2
+            - !Ref PrivateSubnet3
           SecurityGroups:
             - !Ref containersecuritygroup
       LoadBalancers:
-        - ContainerName: "drupal2"
+        - ContainerName: "drupal"
           ContainerPort: 80
           TargetGroupArn: !Ref targetgroup
     
@@ -658,10 +743,10 @@ Resources:
           - 'logs'
           - !Ref 'AWS::AccountId'
           - !Ref 'AWS::Region'
-      # BucketEncryption:
-      #   ServerSideEncryptionConfiguration:
-      #     - ServerSideEncryptionByDefault:
-      #         SSEAlgorithm: AES256
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
   
   loadbalancerLogBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
@@ -705,7 +790,7 @@ Resources:
   loadbalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Join ['-', [!Ref ClusterName, LoadBalancer]]
+      #Name: !Join ['-', [!Ref ClusterName, LoadBalancer]]
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
           Value: "true"
@@ -717,7 +802,8 @@ Resources:
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-  
+        - !Ref PublicSubnet3
+
   containersecuritygroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -840,7 +926,12 @@ Resources:
             - "cp -prR /var/www/html/sites/* /mnt"
           Essential: false
           Image: !Ref Image
-
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: ecs
           MountPoints:
             - 
               ContainerPath: "/mnt"
@@ -869,22 +960,7 @@ Resources:
             - 
               ContainerPath: "/var/www/html/themes/"
               SourceVolume: "themes"
-          Name: "drupal2"       
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref LogGroup
-              awslogs-stream-prefix: ecs
-          environment:
-            - name: HOST
-              value: !GetAtt DrupalDB.Endpoint.Address
-            - name: DBASE
-              value: drupal2
-            - name: USER
-              value: !Ref DBAdminUsername
-            - name: PASS
-              value: !Ref DBPassword
+          Name: "drupal"
           PortMappings:
             -
               ContainerPort: 80
@@ -947,4 +1023,3 @@ Outputs:
     Description: "DB endpoint"
     Value: 
       !GetAtt DrupalDB.Endpoint.Address
-
