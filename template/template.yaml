@@ -47,7 +47,7 @@ Parameters:
     Default: drupalonefs2
   Image:
     Type: String
-    Default: "688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest"
+    Default: "drupal:9-php7.4-apache"
     Description: Drupal Image for the ECS service. 
   MinCapacity:
     Description: Minimum Fargate tasks to run
@@ -869,11 +869,7 @@ Resources:
             - 
               ContainerPath: "/var/www/html/themes/"
               SourceVolume: "themes"
-          Name: "drupal2"         
-          # Command:
-          #   - "sh" 
-          #   - "-c"
-          #   - "drush si --db-url=mysql://$USER:$PASS@$HOST:3306/$DBASE"
+          Name: "drupal2"       
           LogConfiguration:
             LogDriver: awslogs
             Options:

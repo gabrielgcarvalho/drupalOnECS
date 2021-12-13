@@ -17,38 +17,38 @@ env:
   # IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  BuildAndDeployDrupalImage:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+  # BuildAndDeployDrupalImage:
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: us-east-2
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
-        # env:
-        #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        #   ECR_REPOSITORY: my-ecr-repo
-        #   IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t drupal docker/
-          docker tag drupal:latest 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
-          docker push 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
-      # - name: Deploy stack
-      #   run: |
-      #       aws cloudformation deploy --template-file template/template.yaml --stack-name drupalOnEcs --parameter-overrides DBPassword=123abcde --capabilities CAPABILITY_IAM
+  #     - name: Build, tag, and push image to Amazon ECR
+  #       # env:
+  #       #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #       #   ECR_REPOSITORY: my-ecr-repo
+  #       #   IMAGE_TAG: ${{ github.sha }}
+  #       run: |
+  #         docker build -t drupal docker/
+  #         docker tag drupal:latest 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
+  #         docker push 688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest
+  #     # - name: Deploy stack
+  #     #   run: |
+  #     #       aws cloudformation deploy --template-file template/template.yaml --stack-name drupalOnEcs --parameter-overrides DBPassword=123abcde --capabilities CAPABILITY_IAM
 
   DeployCloudformationStack:
     if: github.ref == 'refs/heads/main'
-    needs: [BuildAndDeployDrupalImage]
+    # needs: [BuildAndDeployDrupalImage]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
