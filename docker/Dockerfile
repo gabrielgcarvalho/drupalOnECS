@@ -5,3 +5,5 @@ RUN set -eux; \
     composer update symfony/var-dumper; \
     composer require drush/drush:^10; \
     composer update 
+COPY 000-default.conf /etc/apache2/sites-available
+

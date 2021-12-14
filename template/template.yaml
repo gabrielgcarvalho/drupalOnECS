@@ -49,7 +49,7 @@ Parameters:
     Default: drupalonefs
   Image:
     Type: String
-    Default: "688832125989.dkr.ecr.us-east-2.amazonaws.com/drupal:latest"
+    Default: "drupal:8-apache"
     Description: Drupal Image for the ECS service. 
   MinCapacity:
     Description: Minimum Fargate tasks to run
@@ -923,7 +923,7 @@ Resources:
           EntryPoint:
             - "sh"
             - "-c"
-            - "cp -prR /opt/drupal/web/sites/* /mnt"
+            - "cp -prR /var/www/html/sites/* /mnt"
           Essential: false
           Image: !Ref Image
           LogConfiguration:
@@ -952,19 +952,19 @@ Resources:
               awslogs-stream-prefix: ecs
           MountPoints:
             -
-              ContainerPath: "/opt/drupal/web/modules/"
+              ContainerPath: "/var/www/html/modules/"
               SourceVolume: "modules"
             
             - 
-              ContainerPath: "/opt/drupal/web/sites/"
+              ContainerPath: "/var/www/html/sites/"
               SourceVolume: "sites"
 
             - 
-              ContainerPath: "/opt/drupal/web/profiles/"
+              ContainerPath: "/var/www/html/profiles/"
               SourceVolume: "profiles"
 
             - 
-              ContainerPath: "/opt/drupal/web/themes/"
+              ContainerPath: "/var/www/html/themes/"
               SourceVolume: "themes"
           Name: "drupal"
           PortMappings:
